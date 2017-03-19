@@ -1,4 +1,4 @@
-#Escape The Haunted House V1.0
+#Escape The Haunted House V1.1
 #Eric Peterson 2/19/2017
 
 #Find Player's Position In House
@@ -52,6 +52,7 @@ def examine(item, player_inventory, room_inventory, room_contents, descriptions)
         print descriptions[item]
     else:
         print "I don't see %s here." % item
+
     return
 
 # Pick up item from room and place in player inventory
@@ -60,11 +61,13 @@ def Pick_up (player_inventory, room_inventory, item):
     # inventory and remove it from the room's inventory. Tell player that
     # the item has been picked up. Otherwise, change nothing and inform player
     # that item is not in the room. Return both inventories.
+    i = item
+    if item in room_inventory:
 
-    if (item in room_inventory):
-        player_inventory.append(item)
-        room_inventory.remove(item)
-        print "You pick up the %s" % item
+        player_inventory.append(i)
+        room_inventory.remove(i)
+        print "You pick up the %s" % i
+        return (player_inventory, room_inventory)
 
     else:
         print "I don't see %s here." % item
@@ -79,9 +82,11 @@ def drop_item (player_inventory, room_inventory, item):
     # that player is not carrying the item.
 
     if (item in player_inventory):
+
         room_inventory.append(item)
         player_inventory.remove(item)
         print "You drop the %s" % item
+        return (player_inventory, room_inventory)
 
     else:
         print "You aren't carrying %s" % item
@@ -132,6 +137,8 @@ def parse_input(player_input):
 # Parse two word commands
 def parse_two(player_input, room_name, room_inventory,
 player_inventory, room_contents, room_puzzle, room_exits, descriptions):
+
+    print type(room_inventory)
     # Look for verbs used in two word commands.
     if (player_input[0] == "GET"):
         (player_inventory, room_inventory) = Pick_up(player_inventory,
@@ -145,7 +152,7 @@ player_inventory, room_contents, room_puzzle, room_exits, descriptions):
         examine(player_input[1], player_inventory, room_inventory,
         room_contents, descriptions)
 
-    elif (player_input[0] == "PUSH" or player_input[0] == "THROW" or player_input[0] == "PULL"):
+    elif (player_input[0] == "PUSH" or player_input[0] == "MOVE" or player_input[0] == "PULL"):
         (room_puzzle, room_exits) = move(player_input, room_contents,
         room_inventory, room_puzzle)
 
@@ -157,8 +164,35 @@ player_inventory, room_contents, room_puzzle, room_exits, descriptions):
         (player_inventory, room_inventory) = drop_item(player_inventory,
         room_inventory, player_input[1])
 
+    elif (player_input[0] == "SEARCH"):
+        coats = (player_input[1] == "COATS" or player_input[1] == "PILE")
+        books = (player_input[1] == "BOOKS" or player_input[1] == "BOOKSHELF")
+
+        if (coats and room_name == 'Coat Room' and room_puzzle[1] == False):
+
+            print "You search the pile of coats furiously ..."
+            print "\n Exhausted, you are about to give up ..."
+            print "\n A box of matches falls out of a coat pocket."
+
+            room_inventory.append('MATCHES')
+            room_puzzle[1] == True
+
+        elif (books and room_name == 'Study' and room_puzzle[1] == False):
+
+            print "You start flipping through the books on the shelf"
+            print "hoping to find some clue. Page after page, book after book,"
+            print "your vision starts to blur and it gets difficult to focus"
+            print "until a single page flutters to the floor from the book"
+            print "you are currently holding."
+
+            room_inventory.append('PAGE')
+            room_puzzle[1] == True
+
+        else:
+            print "You search %s, but it proves fruitless." % player_input[1]
+
     return (player_inventory, room_inventory, room_contents,
-    room_puzzle, room_exits, descriptions)
+            room_puzzle, room_exits, descriptions)
 
 # Parse three word commands
 def parse_three(player_input, room_name, room_inventory,
@@ -184,20 +218,28 @@ player_inventory, room_contents, room_puzzle, room_exits, descriptions):
     # less than 2 or more than 4, tell player that you don't understand
     # and have them try again.
     if (parsed_length == 2):
-        return parse_two(parsed_words, room_name, room_inventory,
-        player_inventory, room_contents, room_puzzle, room_exits, descriptions)
+        (player_inventory, room_inventory, room_contents,
+        room_puzzle, room_exits, descriptions) = parse_two(parsed_words,
+        room_name, room_inventory, player_inventory, room_contents, room_puzzle,
+        room_exits, descriptions)
 
     elif (parsed_length == 3):
-        return parse_three(parsed_words, room_name, room_inventory,
-        player_inventory, room_contents, room_puzzle, room_exits, descriptions)
+        (player_inventory, room_inventory, room_contents,
+        room_puzzle, room_exits, descriptions) = parse_three(parsed_words,
+        room_name, room_inventory, player_inventory, room_contents, room_puzzle,
+        room_exits, descriptions)
 
     elif (parsed_length == 4):
-        return parse_four(parsed_words, room_name, room_inventory,
-        player_inventory, room_contents, room_puzzle, room_exits, descriptions)
+        (player_inventory, room_inventory, room_contents,
+        room_puzzle, room_exits, descriptions) = parse_four(parsed_words,
+        room_name, room_inventory, player_inventory, room_contents, room_puzzle,
+        room_exits, descriptions)
+
     else:
         print "I don't understand what you are trying to say."
-        return (room_inventory, player_inventory, room_contents,
-        room_puzzle, room_exits, descriptions)
+
+    return (player_inventory, room_inventory, room_contents,
+           room_puzzle, room_exits, descriptions)
 
 
 # Run the room indicated by player position
@@ -238,6 +280,7 @@ player_inventory, player_pos_x, player_pos_y, room_exits, descriptions):
         if (player_input == "QUIT"):
             quit("Goodbye and thanks for playing.")
 
+        # Check to see if player wants to view inventory
         if (player_input == "INVENTORY" or player_input == "I"):
             print "You are carrying:\n"
             print player_inventory
@@ -249,7 +292,9 @@ player_inventory, player_pos_x, player_pos_y, room_exits, descriptions):
         #player_pos_y)
 
         # Check to see if player wants to move. If so, move player
-        # and go back to room selection.
+        # and go back to room selection. Note that south is positive
+        # and North is negative in this game since the player is working
+        # their way south toward the ultimate exit.
         if (player_input in room_exits):
 
             if (player_input == "NORTH" or player_input == "N"):
@@ -325,49 +370,64 @@ place engulfs you. Doors lie at the end."""
 south_hall_exits = ['NORTH', 'N', 'SOUTH', 'S', 'EAST', 'E', 'WEST', 'W']
 south_hall_inventory = []
 south_hall_contents = ['STRANGE PAINTING']
-south_hall_puzzle = [' ', False, ' ']
+south_hall_puzzle = ['The floor is surprisingly smooth here.', False,
+'An intricate design has been drawn on the floor in chalk.']
 
 # Study
-study_desc = """There """
+study_desc = """There is a thick coating of dust on every surface here, pristine
+and undisturbed. Bookshelves line the walls and a small reading table occupies
+the far corner."""
 study_exits = ['EAST', 'E']
 study_inventory = ['HIDEBOUND BOOK']
 study_contents = ['BOOKSHELF']
-study_puzzle = [' ', False, ' ']
+study_puzzle = ['The bookshelf is full of books.', False,
+ 'Books are piled on the floor.']
 
 # Bedroom
-bedroom_desc = """Bedroom"""
+bedroom_desc = """A large, four poster bed dominates the center of the room. It
+is flanked by a large vanity on one side and an immense chest of drawers on the
+other side. The bed sheets are stained brown and brittle, soaked through with
+old blood."""
 bedroom_exits = ['EAST', 'E', 'WEST', 'W']
 bedroom_inventory = []
 bedroom_contents = ['DRESSER']
-bedroom_puzzle = [' ', False, ' ']
+bedroom_puzzle = ['The dresser lies flat against the far wall. ', False,
+'The dresser has been moved rom the wall, exposing a new door. ']
 
 # Dungeon
-dungeon_desc = """Dungeon"""
+dungeon_desc = """The stink of this room hits you like a sledgehammer. Every
+inch seems to be stained. The cold stone all but glows with malevolence."""
 dungeon_exits = ['WEST', 'W']
 dungeon_inventory = []
 dungeon_contents = ['SHACKLES', 'SKELETON']
-dungeon_puzzle = [' ', False, ' ']
+dungeon_puzzle = ['A female skeleton hangs, shackled to the wall.', False,
+'The remains of a female skeleton litter the floor.']
 
 # Dining Room
-dining_room_desc = """Dining Room"""
+dining_room_desc = """The last meal of whoever owned this house lies on the
+table, green with mold and smelling strongly of decay."""
 dining_room_exits = ['NORTH', 'N', 'SOUTH', 'S']
 dining_room_inventory = ['KNIFE']
 dining_room_contents = ['TABLE']
 dining_room_puzzle = [' ', False, ' ']
 
 # Kitchen
-kitchen_desc = """Kitchen"""
+kitchen_desc = """The kitchen is a wreck. It looks as if there was a fight here,
+and someone came out the definite loser. Old bloodstains abound from counter to
+floor."""
 kitchen_exits = ['NORTH', 'N', 'SOUTH', 'S']
-kitchen_inventory = ['GARLIC']
+kitchen_inventory = []
 kitchen_contents = ['OVEN']
-kitchen_puzzle = [' ', False, ' ']
+kitchen_puzzle = ['The oven is strangely warm.', False,
+ 'The oven is now cold and lifeless.']
 
 # Basement
-basement_desc = """Basement"""
+basement_desc = """Dank and cold, the basement smells of earth and old wood.
+At the far end is a door leading out to salvation."""
 basement_exits = ['NORTH', 'N', 'SOUTH', 'S']
 basement_inventory = []
-basement_contents = ['VAMPIRE']
-basement_puzzle = ['The Vampire snarls at you, baring his fangs.', False,
+basement_contents = ['GHOST']
+basement_puzzle = ['The ghost howls, \'You will join me!\'', False,
 'The way out is clear.']
 
 # Player Starting Position
@@ -375,7 +435,7 @@ player_pos_x = 1
 player_pos_y = 0
 
 # Player inventory
-player_inventory = []
+player_inventory = ['HANDS']
 
 # Store descriptions in a dictionary for 'examine'
 # Make it global so we can change descriptions when
