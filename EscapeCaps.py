@@ -1,4 +1,4 @@
-#Escape The Haunted House V1.1
+#Escape The Haunted House V1.2
 #Eric Peterson 2/19/2017
 
 #Find Player's Position In House
@@ -138,29 +138,49 @@ def parse_input(player_input):
 def parse_two(player_input, room_name, room_inventory,
 player_inventory, room_contents, room_puzzle, room_exits, descriptions):
 
-    print type(room_inventory)
-    # Look for verbs used in two word commands.
+    # Look for verbs used in two word commands. Commands that could see
+    # a lot of use or do something that has an effect no matter where or
+    # what the player is working with have their own functions.
+    throw = (player_input[0] == 'THROW' or player_input[0] == 'HURL')
+
+    examine = (player_input[0] == "EXAMINE" or player_input[0] == "INSPECT")
+
+    move = (player_input[0] == "PUSH" or player_input[0] == "MOVE"
+    or player_input[0] == "PULL")
+
+    hit = (player_input[0] == "HIT" or player_input[0] == "STRIKE"
+    or player_input[0] == "ATTACK")
+
+    drop = (player_input[0] == "DROP" or player_input[0] == "PLACE")
+
+    fire = (player_input[1] == "FIRE" or player_input[1] == "FIREPLACE"
+    or player_input[1] == "MATCH")
+
+    show = (player_input[0] == "SHOW" or player_input[0] == "DISPLAY")
+
+    draw = (player_input[0] == "DRAW" or player_input[0] == "INSCRIBE")
+
     if (player_input[0] == "GET"):
         (player_inventory, room_inventory) = Pick_up(player_inventory,
         room_inventory, player_input[1])
 
-    elif (player_input[0] == "THROW" or player_input[0] == "HURL"):
+    elif (throw):
         (player_inventory, room_inventory) = throw(player_inventory,
         room_inventory, player_input[1])
 
-    elif (player_input[0] == "EXAMINE" or player_input[0] == "INSPECT"):
+    elif (examine):
         examine(player_input[1], player_inventory, room_inventory,
         room_contents, descriptions)
 
-    elif (player_input[0] == "PUSH" or player_input[0] == "MOVE" or player_input[0] == "PULL"):
+    elif (move):
         (room_puzzle, room_exits) = move(player_input, room_contents,
         room_inventory, room_puzzle)
 
-    elif (player_input[0] == "HIT" or player_input[0] == "ATTACK"):
+    elif (hit):
         (room_puzzle, room_contents, descriptions) = hit(player_input, player_inventory,
         room_contents, room_inventory, room_puzzle, descriptions)
 
-    elif (player_input[0] == "DROP" or player_input[0] == "PLACE"):
+    elif (drop):
         (player_inventory, room_inventory) = drop_item(player_inventory,
         room_inventory, player_input[1])
 
@@ -175,7 +195,7 @@ player_inventory, room_contents, room_puzzle, room_exits, descriptions):
             print "\n A box of matches falls out of a coat pocket."
 
             room_inventory.append('MATCHES')
-            room_puzzle[1] == True
+            room_puzzle[1] = True
 
         elif (books and room_name == 'Study' and room_puzzle[1] == False):
 
@@ -186,57 +206,144 @@ player_inventory, room_contents, room_puzzle, room_exits, descriptions):
             print "you are currently holding."
 
             room_inventory.append('PAGE')
-            room_puzzle[1] == True
+            room_puzzle[1] = True
 
         else:
             print "You search %s, but it proves fruitless." % player_input[1]
 
+    elif (player_input[0] == "LIGHT" and fire):
+
+        have_matches == ('MATCHES' in player_inventory)
+
+        if (have_matches and room_name == "Coat Room"):
+
+            print "There's a whiff of sulfur as you light a match."
+            print "Something jostles you, causing you to drop it into"
+            print "the moldy pile of coats. The mold combusts and flames"
+            print "fill the room. Thick, black smoke overwhelms you and"
+            print "you sink to the floor, choking as the world goes back."
+            print "Years later, they find your charred remains, still"
+            print "reaching for the door."
+
+            player_death()
+
+        elif (have_matches and "FIREPLACE" in room_contents and !room_puzzle[1]):
+
+            print "You light the match and watch it flare, the flames dancing"
+            print "around the head of the match. You throw it in the fireplace"
+            print "and it roars to life. The room grows warm at an unnatural"
+            print "rate and a little dread is lifted from your soul. Something"
+            print "falls from the flames and lands at your feet."
+
+            room_puzzle[1] = True
+            room_inventory.append("CHARCOAL")
+
+        elif (have_matches):
+            print "You light the match and watch it flare. Eventually it fades"
+            print "and goes out."
+
+        else:
+            print "With what?"
+
+    elif (player_input[0] == "READ"):
+
+        book = (player_input[1] == "BOOK" or player_input[1] == "HIDEBOUND BOOK")
+        page = (player_input[1] == "PAGE")
+        book_present = ("HIDEBOUND BOOK" in room_inventory
+        or "HIDEBOUND BOOK" in player_inventory)
+        page_present = ("PAGE" in room_inventory or "PAGE" in player_inventory)
+
+        if (book and book_present):
+            print """
+            BOOK TEXT (PLACEHOLDER)
+            """
+        elif (page and page_present):
+            print "There's no writing, only a diagram."
+
+        elif (book and room_name == "Study"):
+            print "It would take you forever to read all these."
+        else:
+            print "Nothing to read here."
+
+    elif (show):
+        has_locket = ("LOCKET" in player_inventory)
+        has_blessed_locket = ("BLESSED LOCKET" in player_inventory)
+        ghost_present = ("GHOST" in room_contents)
+
+        if (has_locket and ghost_present):
+
+            print "The ghost looks forelornly at the locket but makes no move."
+
+        elif (has_blessed_locket and ghost_present):
+
+            print """
+            The ghost reaches toward you, but you hold up the glowing curio
+            and she backs off. The glow intensifies, engulfing her in a bright,
+            white light. She screams as her incorporeal form disintigrates
+            before your eyes. The oppressive atmosphere of the house falls
+            away, leaving you with nothing between yourself and freedom.
+            """
+            room_puzzle[1] == True
+            room_exits.append["SOUTH"]
+            room_exits.append["S"]
+
+        else:
+            print "Nothing happens."
+            print "You feel kind of stupid holding up this %s" % player_input[1]
+
+    elif (draw and player_input[1] == "DIAGRAM"):
+        page_present = ("PAGE" in room_inventory or "PAGE" in player_inventory)
+        charcoal_present = ("CHARCOAL" in player_inventory)
+
+        if (page_present and charcoal_present and room_name = "South Hall"):
+
+            print """
+            DRAWING TEXT (Placeholder)
+            """
+            room_puzzle[1] = True
+
+        elif (charcoal_present and room_name = "South Hall"):
+
+            print """
+            You try to draw the diagram from memory, but it is far too complicated.
+            As you finish, the ghost appears, a cadaverous female apparition with
+            talons for hands. She rends you limb from limb and you die in agony.
+            """
+            player_death()
+
+        elif (charcoal_present):
+
+            print """
+            You spend some time doodling on various objects and the walls. It
+            leads no where. You should probably get back to the task at hand.
+            """
+        else:
+            print "You have nothing to draw with."
+
     return (player_inventory, room_inventory, room_contents,
             room_puzzle, room_exits, descriptions)
 
-# Parse three word commands
-def parse_three(player_input, room_name, room_inventory,
-player_inventory, room_contents, room_puzzle, descriptions):
-    return
-
-# Parse four word commands
-def parse_four(player_input, room_name, room_inventory,
-player_inventory, room_contents, room_puzzle, descriptions):
-    return
 
 # Most complicated part of game. Take player input and parse it, then
 # compare actions to room contents, inventory, and puzzle and return
-# the values of those. Further broken down into sub-parsers based on
-# the number of words the player inputs.
+# the values of those.
 def parser (player_input, room_name, room_inventory,
 player_inventory, room_contents, room_puzzle, room_exits, descriptions):
 
     # Break up player input with the parse_input function
     parsed_words, parsed_length = parse_input(player_input)
 
-    # Select subparser based on number of words in player command. If
-    # less than 2 or more than 4, tell player that you don't understand
-    # and have them try again.
+    # Look for two word commands and send to parser. Return an
+    # error message if player tries to use more (or less) words.
     if (parsed_length == 2):
+
         (player_inventory, room_inventory, room_contents,
         room_puzzle, room_exits, descriptions) = parse_two(parsed_words,
         room_name, room_inventory, player_inventory, room_contents, room_puzzle,
         room_exits, descriptions)
-
-    elif (parsed_length == 3):
-        (player_inventory, room_inventory, room_contents,
-        room_puzzle, room_exits, descriptions) = parse_three(parsed_words,
-        room_name, room_inventory, player_inventory, room_contents, room_puzzle,
-        room_exits, descriptions)
-
-    elif (parsed_length == 4):
-        (player_inventory, room_inventory, room_contents,
-        room_puzzle, room_exits, descriptions) = parse_four(parsed_words,
-        room_name, room_inventory, player_inventory, room_contents, room_puzzle,
-        room_exits, descriptions)
-
     else:
         print "I don't understand what you are trying to say."
+        print "Use only two words, please."
 
     return (player_inventory, room_inventory, room_contents,
            room_puzzle, room_exits, descriptions)
@@ -257,7 +364,7 @@ player_inventory, player_pos_x, player_pos_y, room_exits, descriptions):
 
         # Check to see if the room puzzle has been solved and display
         # the correct description.
-        # print room_puzzle[1]
+
         if (room_puzzle[1] == True):
             print room_puzzle[2]
         else:
@@ -408,8 +515,9 @@ dining_room_desc = """The last meal of whoever owned this house lies on the
 table, green with mold and smelling strongly of decay."""
 dining_room_exits = ['NORTH', 'N', 'SOUTH', 'S']
 dining_room_inventory = ['KNIFE']
-dining_room_contents = ['TABLE']
-dining_room_puzzle = [' ', False, ' ']
+dining_room_contents = ['SERVING DISH']
+dining_room_puzzle = ['One serving dish remains covered.', False,
+'A rotted head looks up at you from the table, eyes blank and ruined.']
 
 # Kitchen
 kitchen_desc = """The kitchen is a wreck. It looks as if there was a fight here,
@@ -417,14 +525,14 @@ and someone came out the definite loser. Old bloodstains abound from counter to
 floor."""
 kitchen_exits = ['NORTH', 'N', 'SOUTH', 'S']
 kitchen_inventory = []
-kitchen_contents = ['OVEN']
+kitchen_contents = ['OVEN', 'BASEMENT DOOR']
 kitchen_puzzle = ['The oven is strangely warm.', False,
  'The oven is now cold and lifeless.']
 
 # Basement
 basement_desc = """Dank and cold, the basement smells of earth and old wood.
 At the far end is a door leading out to salvation."""
-basement_exits = ['NORTH', 'N', 'SOUTH', 'S']
+basement_exits = ['NORTH', 'N']
 basement_inventory = []
 basement_contents = ['GHOST']
 basement_puzzle = ['The ghost howls, \'You will join me!\'', False,
@@ -435,11 +543,10 @@ player_pos_x = 1
 player_pos_y = 0
 
 # Player inventory
-player_inventory = ['HANDS']
+player_inventory = []
 
 # Store descriptions in a dictionary for 'examine'
-# Make it global so we can change descriptions when
-# the player causes something to happen to an item.
+# Descriptions can be changed.
 
 descriptions = {
 'FLASHLIGHT': """A standard D-Cell flashlight. It is off.""",
@@ -458,9 +565,18 @@ house.""",
 'ARMOR': """A medeival suit of armor held together by pins. One arm appears
 to be loose.""",
 
+'HIDEBOUND BOOK': """An old, heavy tome wrapped in thin, almost paper-like leather.
+Best not to ask what animal it came from.""",
+
+'PAGE': """This page has seen better days. There's an intricate diagram inscribed
+on it.""",
+
+
+
 
 }
 
+Loc_map = {(0,2): 'Entrance', (0,1): 'Coat Room'}
 # Main Part of Program
 
 # Show Intro When Game Starts
