@@ -7,13 +7,18 @@ The project involves writing a game similar to EX 35, but improving over about a
 Some Design Decisions I Made
 * I settled on a generic room function that takes room descriptors and attributes as arguments. Room attributes are laid out as follows:
 
-# Entrance
+Entrance
+
 entrance_desc = """
 Stone flooring radiates unforgiving cold and the gray walls seem to sap all
 color from the room. The door behind you is shut tightly. """
+
 entrance_exits = ['SOUTH', 'S', 'EAST', 'E']
+
 entrance_inventory = []
+
 entrance_contents = ['FIREPLACE']
+
 entrance_puzzle = ['The fireplace is cold.', False,
 'Fire crackles wildly in the fireplace.']
 
