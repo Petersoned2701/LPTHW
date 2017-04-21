@@ -112,11 +112,11 @@ def drop_item (player_inventory, room_inventory, item):
 def throw_item (player_inventory, room_inventory, player_input,
 room_contents, room_puzzle):
 
-    # Check to see if item is in player inventory
     blessed_locket = (player_input[1] == "BLESSED LOCKET")
     locket = (player_input[1] == "LOCKET")
     ghost_present = ("GHOST" in room_contents)
 
+    # Check to see if item is in player inventory
     if (player_input[1] in player_inventory):
 
         if (locket and ghost_present):
@@ -247,9 +247,12 @@ def parse_input(player_input):
 def parse_two(player_input, room_name, room_inventory,
 player_inventory, room_contents, room_puzzle, room_exits, descriptions):
 
+    ##########################################################################
     # Look for verbs used in two word commands. Commands that could see
     # a lot of use or do something that has an effect no matter where or
     # what the player is working with have their own functions.
+    #########################################################################
+
     throw = (player_input[0] == 'THROW' or player_input[0] == 'HURL')
 
     inspect = (player_input[0] == "EXAMINE" or player_input[0] == "INSPECT")
@@ -531,10 +534,12 @@ player_inventory, room_contents, room_puzzle, room_exits, descriptions):
     return (player_inventory, room_inventory, room_contents,
             room_puzzle, room_exits, descriptions)
 
-
+#############################################################################
 # Most complicated part of game. Take player input and parse it, then
 # compare actions to room contents, inventory, and puzzle and return
 # the values of those.
+#############################################################################
+
 def parser (player_input, room_name, room_inventory,
 player_inventory, room_contents, room_puzzle, room_exits, descriptions):
 
@@ -545,8 +550,11 @@ player_inventory, room_contents, room_puzzle, room_exits, descriptions):
     adjectives =  ['SERVING', 'SEVERED', 'HIDEBOUND', 'BLESSED',
     'STRANGE', 'BASEMENT', 'COAT']
 
+    #######################################################################
     # Look for two word commands and send to parser. Return an
     # error message if player tries to use more (or less) words.
+    #######################################################################
+
     if (parsed_length == 2):
 
         (player_inventory, room_inventory, room_contents,
@@ -554,6 +562,7 @@ player_inventory, room_contents, room_puzzle, room_exits, descriptions):
         room_name, room_inventory, player_inventory, room_contents, room_puzzle,
         room_exits, descriptions)
 
+    ###########################################################################
     # Check to see if player has targeted one of the objects that is
     # described with two words in the game. If they have, combine the
     # two words and pass that to the parser along with the action.
@@ -561,6 +570,7 @@ player_inventory, room_contents, room_puzzle, room_exits, descriptions):
     # "GET" "HIDEBOUND" "BOOK", since "HIDEBOUND" is an adjective used
     # by the game, the parser recombines the adjective/noun combo as one
     # element of the parsed_words list so it can be processed.
+    ###########################################################################
 
     elif (parsed_length == 3 and parsed_words[1] in adjectives):
 
@@ -571,6 +581,7 @@ player_inventory, room_contents, room_puzzle, room_exits, descriptions):
         room_puzzle, room_exits, descriptions) = parse_two(parsed_words,
         room_name, room_inventory, player_inventory, room_contents, room_puzzle,
         room_exits, descriptions)
+
     else:
         print "I don't understand what you are trying to say."
 
@@ -582,18 +593,26 @@ player_inventory, room_contents, room_puzzle, room_exits, descriptions):
 def room (room_desc, room_inventory, room_contents, room_puzzle, room_name,
 player_inventory, player_pos_x, player_pos_y, room_exits, descriptions):
 
+        #####################################################################
         # Takes room variables and provides handling for player action in
         # each specific room.
+        #####################################################################
+
         print "\n****** %s ******" % room_name
         print room_desc
         print room_contents
 
+        ######################################################################
         # Check to see if the room puzzle has been solved and display
         # the correct description.
+        ######################################################################
 
         if (room_puzzle[1] == True):
+
             print room_puzzle[2]
+
         else:
+
             print room_puzzle[0]
 
         # Display the room inventory.
@@ -607,8 +626,8 @@ player_inventory, player_pos_x, player_pos_y, room_exits, descriptions):
     # Loop function while player remains in room or quits game.
         while True:
 
-            #Prompt player for input. Capitalize input to standardize
-            #it and make parsing easier.
+            # Prompt player for input. Capitalize input to standardize
+            # it and make parsing easier.
             player_raw = str(raw_input(">>"))
             player_input = player_raw.upper()
 
@@ -630,10 +649,13 @@ player_inventory, player_pos_x, player_pos_y, room_exits, descriptions):
             #print "Current location: x:%r, y:%r" % (player_pos_x,
             #player_pos_y)
 
+            ##################################################################
             # Check to see if player wants to move. If so, move player
             # and go back to room selection. Note that south is positive
             # and North is negative in this game since the player is working
             # their way south toward the ultimate exit.
+            ##################################################################
+
             elif (player_input in room_exits):
 
                 if (player_input == "NORTH" or player_input == "N"):
@@ -680,9 +702,12 @@ def escape():
     quit("You Win!")
 
     return
+
 # Set up room variables and player defaults
 
-# Entrance
+############
+# Entrance #
+############
 entrance_desc = """
 Stone flooring radiates unforgiving cold and the gray walls seem to sap all
 color from the room. The door behind you is shut tightly. """
@@ -692,7 +717,9 @@ entrance_contents = ['FIREPLACE']
 entrance_puzzle = ['The fireplace is cold.', False,
 'Fire crackles wildly in the fireplace.']
 
-# Coat Room
+#############
+# Coat Room #
+#############
 coat_room_desc = """
 This room is almost a closet and moldy coats are piled haphazardly on the floor.
 A large coat rack leans against the far wall. """
@@ -702,7 +729,9 @@ coat_room_contents = ['COAT PILE']
 coat_room_puzzle = ['The pile of coats lies undisturbed', False,
 'Coats are strewn across the room.']
 
-# North Hall
+##############
+# North Hall #
+##############
 north_hall_desc = """Ancient suits of armor line the walls as the hallway
 disappears into apparent darkness. There are no doors, only faded portraits
 and crests. Dust is thick in the chill air."""
@@ -712,7 +741,9 @@ north_hall_contents = ['ARMOR']
 north_hall_puzzle = ['A strange suit of armor stands here.', False,
 'A strange suit of armor, now missing an arm, stands here.']
 
-# South Hall
+##############
+# South Hall #
+##############
 south_hall_desc = """The further in you go, the more the malevolence of this
 place engulfs you. Doors lie at the end."""
 south_hall_exits = ['NORTH', 'N', 'SOUTH', 'S', 'EAST', 'E', 'WEST', 'W']
@@ -721,7 +752,9 @@ south_hall_contents = ['STRANGE PAINTING']
 south_hall_puzzle = ['The floor is surprisingly smooth here.', False,
 'An intricate design has been drawn on the floor in chalk.']
 
-# Study
+#########
+# Study #
+#########
 study_desc = """There is a thick coating of dust on every surface here, pristine
 and undisturbed. Bookshelves line the walls and a small reading table occupies
 the far corner."""
@@ -731,7 +764,9 @@ study_contents = ['BOOKSHELF']
 study_puzzle = ['The bookshelf is full of books.', False,
  'Books are piled on the floor.']
 
-# Bedroom
+###########
+# Bedroom #
+###########
 bedroom_desc = """A large, four poster bed dominates the center of the room. It
 is flanked by a large vanity on one side and an immense chest of drawers on the
 other side. The bed sheets are stained brown and brittle, soaked through with
@@ -742,7 +777,9 @@ bedroom_contents = ['DRESSER']
 bedroom_puzzle = ['The room is undisturbed. ', False,
 'The dresser has been moved from the wall, exposing a new door. ']
 
-# Dungeon
+###########
+# Dungeon #
+###########
 dungeon_desc = """The stink of this room hits you like a sledgehammer. Every
 inch seems to be stained. The cold stone all but glows with malevolence."""
 dungeon_exits = ['WEST', 'W']
@@ -751,7 +788,9 @@ dungeon_contents = ['SHACKLES', 'SKELETON']
 dungeon_puzzle = ['A female skeleton hangs, shackled to the wall.', False,
 'The remains of a female skeleton litter the floor.']
 
-# Dining Room
+###############
+# Dining Room #
+###############
 dining_room_desc = """The last meal of whoever owned this house lies on the
 table, green with mold and smelling strongly of decay."""
 dining_room_exits = ['NORTH', 'N', 'SOUTH', 'S']
@@ -760,7 +799,9 @@ dining_room_contents = ['SERVING DISH']
 dining_room_puzzle = ['One serving dish remains covered.', False,
 'A rotted head looks up at you from the table, eyes blank and ruined.']
 
-# Kitchen
+###########
+# Kitchen #
+###########
 kitchen_desc = """The kitchen is a wreck. It looks as if there was a fight here,
 and someone came out the definite loser. Old bloodstains abound from counter to
 floor."""
@@ -770,7 +811,9 @@ kitchen_contents = ['BASEMENT DOOR']
 kitchen_puzzle = ['The basement door is locked.', False,
  'The basement door is unlocked.']
 
-# Basement
+############
+# Basement #
+############
 basement_desc = """Dank and cold, the basement smells of earth and old wood.
 At the far end is a door leading out to salvation."""
 basement_exits = ['NORTH', 'N']
@@ -786,9 +829,10 @@ player_pos_y = 0
 # Player inventory
 player_inventory = []
 
+###############################################################################
 # Store descriptions in a dictionary for 'examine'
 # Descriptions can be changed.
-
+###############################################################################
 descriptions = {
 'FIREPLACE':
 """
@@ -886,6 +930,7 @@ know you must escape ...\n\nWELCOME TO:\nESCAPE FROM THE HAUNTED HOUSE"""
 
 # Loop while playing the game.
 while True:
+    
     # Find the location of the player in the house.
     room_name = where_is_player(player_pos_x, player_pos_y)
 
